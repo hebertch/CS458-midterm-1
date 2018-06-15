@@ -47,7 +47,7 @@
               <p id="contents"></p>
            <p> <h3>Current Files</h3><h4>(click to load data)</h4></p>
             <div class="col-sm-12 pb-4" ng-repeat="file in files">
-                <hr> <div class="btn col-sm-12" ng-model="selectedFile" ng-click="updateVisual(file.value)"><h6>Name:  {{file.name}}<br>Word Count:  {{file.wordCount}}</h6></div>
+                <hr> <div class="btn col-sm-12" ng-click="updateVisual(file)"><h6>Name:  {{file.name}}<br>Word Count:  {{file.wordCount}}</h6></div>
             </div>
             
           </div>
@@ -75,7 +75,7 @@
         <div>
           <h3>
               Now showing:<br>
-              File: {{selectedFile}}<br>
+              File: {{selectedFile.name}}<br>
               Type: {{selectedType}}
 
           </h3>
@@ -84,14 +84,15 @@
        
       <!-- </div>  -->
       <svg width="960" height="960" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
+      <canvas id="canvas" width="2048" height="500"></canvas>
       <script src="https://d3js.org/d3.v4.min.js"></script>
       <script>
           var file, input, fr, array, query;
          
           function onFileLoad(elementId, event) {
-              console.log(file);
+          //console.log(file);
               array = event.target.result.replace(/\n/g, " ").replace(/\r/g,"").split(" ");
-              console.log(array);
+          //console.log(array);
               query = {
                   "name": file.name,
                   "count": array.length,
@@ -136,6 +137,7 @@
           }
       </script>
      
+    <script src="js/papaparse.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <!-- <script src="//d3js.org/d3.v3.min.js"></script> -->
     <script type="text/javascript" src="lib/angular.min.js"></script>
