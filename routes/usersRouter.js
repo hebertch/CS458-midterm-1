@@ -1,48 +1,66 @@
 'use strict';
 var fileUpload = require('../www/models/file-schema'),
-express = require('express'),
+  express = require('express'),
   word = require('../models/usersModel.js'),
 
   router = express.Router();
 
+router.get('/getFiles', (req,res) => {
+  fileUpload.find({}, (err,docs) => {
+    console.log(docs)
+    res.json(docs);
+  });
+});
 
+router.route('/uploadFile')
+  .post(function (req, res) {
+    if (req) {
+      var newFile = new fileUpload();
+      console.log(req.body)
+      newFile.name = req.body.name;
+      newFile.wordCount = req.body.count
 
-  router.route('/uploadFile')
-    .post(function (req, res) {
-      if(req) {
-        var newFile = new fileUpload();
-        console.log(req.body)
-        newFile.name = req.body.name;
-        newFile.wordCount = req.body.count
+      var sorted = req.body.array.sort();
+      var file_words = req.body.array.map(function (word) {
+        return word.toLowerCase();
+      });
+      var words = {};
 
-        var sorted = req.body.array.sort();
-        var prev = sorted[0].toLowerCase();
-        var count = 1;
+      for (var i = 0; i < file_words.length; ++i) {
+        var word = file_words[i];
+        words[word] = words[word] ? words[word] + 1 : 1;
+      }
 
-        for (let i = 0; i < sorted.length-1; i++) {
-          for (let j = 0; j < prev.length-1; j++) {
-            console.log(prev)
-            // newFile.bigrams.push(prev[j] + prev[j+1])
+      var bigrams = {};
+      for (var word in words) {
+        if (words.hasOwnProperty(word)) {
+          for (var i = 0; i < word.length - 1; ++i) {
+            var bigram = '' + word[i] + word[i + 1];
+            var num_instances = words[word];
+            bigrams[bigram] = bigrams[bigram] ? bigrams[bigram] + num_instances : num_instances;
           }
-          if (sorted[i].toLowerCase() == prev) {
-            count++;
-          } else {
-            if (prev != '') {
-              newFile.words.push({word: prev, count: count});
-            }
-            
-            count = 1;
-          }
-          ngrams.push(`${req.body.array[i]} ${req.body.array[i+1]}`)
-          prev = sorted[i].toLowerCase()
-          
-
-          }
-          // console.log(newFile.words);
-          console.log(newFile.bigrams);
         }
-      
-    });
+      }
+    
+      for (let i = 0; i < Object.keys(words).length; i++) {
+        newFile.words.push({
+          word: Object.keys(words)[i],
+          count: Object.values(words)[i]
+        });
+      }
+      for (let j = 0; j < Object.keys(bigrams).length; j++) {
+        newFile.bigrams.push({
+          bigram: Object.keys(bigrams)[j],
+          count: Object.values(bigrams)[j]
+        });
+      }
+    console.log(newFile);
+    newFile.save();
+  
+     
+    }
+
+  });
 
 
 
