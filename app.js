@@ -1,14 +1,24 @@
 'use strict';
 
-var express = require('express'),
-  bodyParser = require('body-parser'),
-  usersRouter = require('./routes/usersRouter.js'),
+var config = require('./config.js');
+var express = require('express');
+var bodyParser = require('body-parser');
+var usersRouter = require('./routes/usersRouter.js');
+var mongoose = require('mongoose');
+var app = express();
 
-  app = express();
+// Database setup and connection
+mongoose.connect(config.MONGO_DATABASE_URL); 
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  console.log("We're connected");
+});
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({
-  extended: false
+  extended: false,
+  limit: '50mb'
 }));
 
 app.use(function (req, res, next) {
@@ -24,8 +34,9 @@ app.use(function (req, res, next) {
 
   next();
 });
-
+require('./routes/usersRouter.js');
+var dbFile = require('./www/models/file-schema');
 app.use(express.static('www'));
-app.use('/api', usersRouter);
+app.use(usersRouter);
 
 module.exports = app;

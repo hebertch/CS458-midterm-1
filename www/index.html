@@ -13,10 +13,9 @@
 
 <body >
   <div id="main">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-          <div style="width: 100%; ">
-              <h1 class="navbar-expand-lg col-md-7">Data Visualization Midterm Project</h1>
-              <h1 class="float-right col-md-4" style="text-align: right;">Aubrey Thenell and Christopher Hebert</h1>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light" style="margin: auto;">
+          <div style="width: 100%; text-align: center;">
+              <h1>Data Visualization Final Project<br>Aubrey Thenell and Christopher Hebert</h1>
           </div>
           <div></div> 
         </nav>
@@ -40,13 +39,19 @@
     
 <!-- </div> -->
   <!-- <div class="row"> -->
+      
           <div class="card container col-sm-12 mt-4">
+              <p> <h3>New File</h3></p>
+              <input type='file' onchange='onChooseFile(event, onFileLoad.bind(this, "contents"))' />
+              <button type="button" class="btn btn-primary" onclick="submit()">Submit</button>
+              <p id="contents"></p>
            <p> <h3>Current Files</h3><h4>(click to load data)</h4></p>
             <div class="col-sm-12 pb-4" ng-repeat="file in files">
                 <hr> <div class="btn col-sm-12" ng-model="selectedFile" ng-click="updateVisual(file.value)"><h6>Name:  {{file.name}}<br>Word Count:  {{file.wordcount}}</h6></div>
             </div>
             
           </div>
+          <div class="col-sm-6 mt-4">
            <div class="btn-group btn-group-toggle" data-toggle="buttons">
         <label class="btn btn-secondary">
             <input type="radio" ng-model="selectedType" value='Words'  ng-click="updateVisual(selectedFile)"> Word
@@ -55,6 +60,17 @@
               <input type="radio" ng-model="selectedType" value='Bigrams' ng-click="updateVisual(selectedFile)"> Bigram
             </label>
         </div>
+      </div>
+      <div class="col-sm-6 mt-4">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary">
+                <input type="radio" ng-model="chart" value='bubble'  ng-click="updateVisual(selectedFile)"> Bubble
+              </label>
+              <label class="btn btn-secondary">
+                  <input type="radio" ng-model="chart" value='bar' ng-click="updateVisual(selectedFile)"> Bar
+                </label>
+            </div>
+          </div>
         <hr>
         <div>
           <h3>
@@ -70,19 +86,71 @@
       <svg width="960" height="960" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
       <script src="https://d3js.org/d3.v4.min.js"></script>
       <script>
-      
-     
-      
+          var file, input, fr, array, query;
+         
+          function onFileLoad(elementId, event) {
+              console.log(file);
+              array = event.target.result.replace(/\n/g, " ").replace(/\r/g,"").split(" ");
+              console.log(array);
+              query = {
+                  "name": file.name,
+                  "count": array.length,
+                  "array": array
+              }
+          }
+  
+          function submit() {
+            if (array) {
+              toastr.info('File upload request sent');
+              xhr = new XMLHttpRequest();
+              var url = "http://localhost:8080/uploadFile";
+              xhr.open("POST", url, true);
+              xhr.setRequestHeader("Content-type", "application/json");
+              xhr.onreadystatechange = function () {
+                  if (xhr.readyState == 4 && xhr.status == 200) {
+                      var json = JSON.parse(xhr.responseText);
+                      console.log(json.email + ", " + json.name)
+                  }
+              }
+              var data = JSON.stringify(query);
+              xhr.send(data);
+            } else {
+              toastr.error('Please select a file');
+            }
+          }
+  
+          function onChooseFile(event, onLoadFileHandler) {
+              if (typeof window.FileReader !== 'function')
+                  throw ("The file API isn't supported on this browser.");
+              input = event.target;
+              if (!input)
+                  throw ("The browser does not properly implement the event object");
+              if (!input.files)
+                  throw ("This browser does not support the `files` property of the file input.");
+              if (!input.files[0])
+                  return undefined;
+              file = input.files[0];
+              fr = new FileReader();
+              fr.onload = onLoadFileHandler;
+              fr.readAsText(file);
+          }
       </script>
+     
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <!-- <script src="//d3js.org/d3.v3.min.js"></script> -->
     <script type="text/javascript" src="lib/angular.min.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
     <script type="text/javascript" src="js/controllers.js"></script>
     <script type="text/javascript" src="js/services.js"></script>
     <script type="text/javascript" src="lib/angular-ui-router.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"></link>
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/darkly/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" -->
     <link rel="stylesheet" href="css/darkly.css">
     <script type="text/javascript" src="lib/angular-resource.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js">
+    </script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js">
+    </script>
 
 
 

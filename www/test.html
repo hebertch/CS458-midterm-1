@@ -1,0 +1,58 @@
+<html>
+
+
+<body>
+
+
+
+    <script>
+        var file, input, fr, array, query;
+
+        function onFileLoad(elementId, event) {
+            console.log(file);
+            array = event.target.result.replace(/\n/g, " ").split(" ");
+            console.log(array);
+            query = {
+                "name": file.name,
+                "count": array.length,
+                "array": array
+            }
+        }
+
+        function submit() {
+            xhr = new XMLHttpRequest();
+            var url = "http://localhost:8080/uploadFile";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var json = JSON.parse(xhr.responseText);
+                    console.log(json.email + ", " + json.name)
+                }
+            }
+            var data = JSON.stringify(query);
+            xhr.send(data);
+        }
+
+        function onChooseFile(event, onLoadFileHandler) {
+            if (typeof window.FileReader !== 'function')
+                throw ("The file API isn't supported on this browser.");
+            input = event.target;
+            if (!input)
+                throw ("The browser does not properly implement the event object");
+            if (!input.files)
+                throw ("This browser does not support the `files` property of the file input.");
+            if (!input.files[0])
+                return undefined;
+            file = input.files[0];
+            fr = new FileReader();
+            fr.onload = onLoadFileHandler;
+            fr.readAsText(file);
+        }
+    </script>
+    <input type='file' onchange='onChooseFile(event, onFileLoad.bind(this, "contents"))' />
+    <button class="btn btn-primay" onclick="submit()">Submit</button>
+    <p id="contents"></p>
+</body>
+
+</html>
